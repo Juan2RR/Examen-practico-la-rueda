@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "https://api.larueda.com.co",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

@@ -1,0 +1,268 @@
+<!-- Pantalla de Login -->
+<div *ngIf="!isLoggedIn" class="login-container">
+  <div class="login-card card">
+    <h2>La Rueda S.A.S.</h2>
+
+    <div *ngIf="loginError" class="message error">{{ loginError }}</div>
+
+    <form (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="loginEmail"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="loginPassword"
+          name="password"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="loginLoading"
+        style="width: 100%"
+      >
+        {{ loginLoading ? "Iniciando sesión..." : "Login" }}
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Pantalla Principal -->
+<div *ngIf="isLoggedIn">
+  <div class="header">
+    <h1>Gestión de Contactos</h1>
+    <div>
+      <span class="user-info">{{ userEmail }}</span>
+      <button class="logout-btn" (click)="onLogout()">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'list'"
+        (click)="setActiveTab('list')"
+      >
+        Listado de Contactos
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'create'"
+        (click)="setActiveTab('create')"
+      >
+        Crear Contacto
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'bulk'"
+        (click)="setActiveTab('bulk')"
+      >
+        Carga Masiva
+      </button>
+    </div>
+
+    <!-- Tab: Listado -->
+    <div *ngIf="activeTab === 'list'" class="card">
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Buscar por nombre, celular o placa..."
+        />
+      </div>
+
+      <div *ngIf="contactsError" class="message error">{{ contactsError }}</div>
+
+      <div *ngIf="contactsLoading" class="loading">Cargando contactos...</div>
+
+      <table *ngIf="!contactsLoading && contacts.length > 0">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Celular</th>
+            <th>Placa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contact of contacts">
+            <td>{{ contact.nombre || "-" }}</td>
+            <td>{{ contact.celular || "-" }}</td>
+            <td>{{ contact.placa || "-" }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p
+        *ngIf="!contactsLoading && contacts.length === 0"
+        style="text-align: center; padding: 20px"
+      >
+        No se encontraron contactos
+      </p>
+
+      <div *ngIf="lastPage > 1" class="pagination">
+        <button
+          *ngIf="currentPage > 1"
+          class="btn btn-secondary"
+          (click)="loadContacts(currentPage - 1)"
+        >
+          Anterior
+        </button>
+
+        <span class="page-info"
+          >Página {{ currentPage }} de {{ lastPage }}</span
+        >
+
+        <button
+          *ngIf="currentPage < lastPage"
+          class="btn btn-secondary"
+          (click)="loadContacts(currentPage + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Crear -->
+    <div *ngIf="activeTab === 'create'" class="card">
+      <h3 style="margin-bottom: 20px">Crear Nuevo Contacto</h3>
+
+      <div *ngIf="createSuccess" class="message success">
+        {{ createSuccess }}
+      </div>
+      <div *ngIf="createError" class="message error">{{ createError }}</div>
+
+      <form (ngSubmit)="onCreateContact()">
+        <div class="form-group">
+          <label for="createNombre">Nombre (obligatorio)</label>
+          <input
+            type="text"
+            id="createNombre"
+            [(ngModel)]="newContact.nombre"
+            name="nombre"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="createCelular">Celular (obligatorio - 10 dígitos)</label>
+          <input
+            type="text"
+            id="createCelular"
+            [(ngModel)]="newContact.celular"
+            name="celular"
+            pattern="[0-9]{10}"
+            minlength="10"
+            maxlength="10"
+            required
+          />
+          <small
+            *ngIf="celularInvalido"
+            style="color: #e74c3c; display: block; margin-top: 5px"
+          >
+            El celular debe tener exactamente 10 dígitos numéricos
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="createPlaca">Placa (opcional)</label>
+          <input
+            type="text"
+            id="createPlaca"
+            [(ngModel)]="newContact.placa"
+            (input)="onPlacaChange()"
+            name="placa"
+            pattern="[A-Z]{3}[0-9]{3}"
+            minlength="6"
+            maxlength="6"
+            placeholder="WCN635"
+          />
+          <small
+            *ngIf="placaInvalida"
+            style="color: #e74c3c; display: block; margin-top: 5px"
+          >
+            La placa debe tener 3 letras seguidas de 3 números (ejemplo: WCN635)
+          </small>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="createLoading"
+        >
+          {{ createLoading ? "Guardando..." : "Guardar" }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetCreateForm()"
+        >
+          Limpiar
+        </button>
+      </form>
+    </div>
+
+    <!-- Tab: Carga Masiva -->
+    <div *ngIf="activeTab === 'bulk'" class="card">
+      <h3 style="margin-bottom: 20px">Carga Masiva de Contactos</h3>
+
+      <div *ngIf="bulkSuccess" class="message success">{{ bulkSuccess }}</div>
+      <div *ngIf="bulkError" class="message error">{{ bulkError }}</div>
+
+      <form (ngSubmit)="onBulkCreate()">
+        <div class="form-group">
+          <label for="bulkJson">JSON de Contactos *</label>
+          <textarea
+            id="bulkJson"
+            [(ngModel)]="bulkJson"
+            name="bulkJson"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="bulkLoading">
+          {{ bulkLoading ? "Cargando..." : "Cargar Contactos" }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetBulkForm()"
+        >
+          Limpiar
+        </button>
+      </form>
+
+      <div class="code-example">
+        <strong>Ejemplo de JSON válido:</strong><br />
+        &#123;<br />
+        &nbsp;&nbsp;"rows": [<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&#123; "nombre": "Ana Ruiz", "celular":
+        "3002223344", "placa": "WCN635" &#125;,<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&#123; "nombre": "Luis Torres", "celular":
+        "3115556677", "placa": "ABC123" &#125;,<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&#123; "nombre": "María Gómez", "celular":
+        "3209998877" &#125;<br />
+        &nbsp;&nbsp;]<br />
+        &#125;<br /><br />
+        <strong style="color: #e74c3c">⚠️ Validaciones:</strong><br />
+        • Nombre: Obligatorio<br />
+        • Celular: Obligatorio, exactamente 10 dígitos<br />
+        • Placa: Opcional, pero si existe debe ser 3 letras + 3 números (WCN635)
+      </div>
+    </div>
+  </div>
+</div>
