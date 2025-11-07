@@ -202,5 +202,41 @@ Haz una recarga forzada del navegador:
 - [x] Validación de placa (3 letras + 3 números)
 
 ---
+# Imágenes del proyecto
+
+### Login
+![Login](capturas/login_0.png)
+![Login](capturas/login_1.png)
+
+
+### Listado de Contactos
+![Listado](capturas/lista_contactos_0.png)
+![Listado](capturas/lista_contactos_1.png)
+
+### busqueda
+![Login](capturas/busqueda.png)
+
+### Creación de contacto
+![Login](capturas/contacto_0.png)
+![Login](capturas/contacto_1.png)
+
+### Carga masiva
+![Login](capturas/carga_masiva_0.png)
+![Login](capturas/carga_masiva_1.png)
+
+### validaciones
+![Login](capturas/validacion_0.png)
+![Login](capturas/validacion_1.png)
+![Login](capturas/validacion_2.png)
+
+
+
+
+
+
+
+
+
+
 
 **Desarrollado para La Rueda S.A.S.**
